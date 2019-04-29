@@ -28,7 +28,24 @@ def item1():
         cv2.drawContours(p,approx,-1,(255,0,0))
 
 def item2():
-    print("Hello Item 2")
+    im1 = cv2.imread(image_folder+"Image1.jpg")
+    im2 = cv2.imread(image_folder+"Image2.jpg")
+
+    im1Gray = cv2.cvtColor(im1,cv2.COLOR_BGR2GRAY)
+    im2Gray = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
+
+    cornersIm1 = cv2.goodFeaturesToTrack(im1Gray,4,0.01,10)
+    cornersIm2 = cv2.goodFeaturesToTrack(im2Gray,4,0.01,10)
+
+    detector = cv2.GFTTDetector_create(maxCorners=4,qualityLevel=0.01,minDistance=10)
+    keypoints = detector.detect(im1Gray)
+
+    print(type(keypoints[0]))
+
+    #cv2.drawKeypoints(im1,keypoints,im1)
+    #cv2.imshow("Imagem",im1)
+    #cv2.waitKey()
+
 
 if __name__ == '__main__':
     item2()
