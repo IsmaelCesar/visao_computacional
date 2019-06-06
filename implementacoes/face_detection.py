@@ -47,11 +47,11 @@ def hair_detection(image,H,I):
     return  mImage
 
 
-def skin_detection(image,F1,F2,White,H,ArcCos):
+def skin_detection(image,F1,F2,White,H,ArcCos,NormRGB):
     global rows, cols
     kImage = image.copy()
     mImage= kImage / 255
-
+    #mImage = np.array([[NormRGB(kImage[i][j][2],kImage[i][j][1],kImage[i][j][0]) for j in range(cols)] for i in range(rows)])
     rImage = mImage[:, :, 2]
     gImage = mImage[:, :, 1]
     bImage = mImage[:, :, 0]
@@ -64,7 +64,7 @@ def skin_detection(image,F1,F2,White,H,ArcCos):
     # computing g < F1(r)
     compF1 = np.array([[1 if gImage[i][j] < applyF1[i][j] else 0 for j in range(cols)] for i in range(rows)])
     compF2 = np.array([[1 if gImage[i][j] > applyF2[i][j] else 0 for j in range(cols)] for i in range(rows)])
-    compW = np.array([[1 if applyW[i][j] > .001 else 0 for j in range(cols)] for i in range(rows)])
+    compW = np.array([[1 if applyW[i][j] > .001 else 0 for j in range(cols)] for i in range(rows)])#old 0.001
     # intersection
     compF1F2W = np.array([[1 if compF1[i][j] == compF2[i][j] else 0 for j in range(cols)] for i in range(rows)])
     compF1F2W = np.array([[1 if compF1F2W[i][j] == compW[i][j] else 0 for j in range(cols)] for i in range(rows)])
@@ -74,11 +74,11 @@ def skin_detection(image,F1,F2,White,H,ArcCos):
     applyW = None
 
     # calculating values for hsiModel
-    angles = ArcCos(rImage, bImage, bImage)
+    angles = ArcCos(rImage, gImage, bImage)
     applyH = np.array([[H(bImage[i][j], gImage[i][j], angles[i][j]) for j in range(cols)] for i in range(rows)])
 
-    greaterH = np.array([[1 if applyH[i][j] > 240 else 0 for j in range(cols)] for i in range(rows)])
-    lesserH = np.array([[1 if applyH[i][j] <= 20 else 0 for j in range(cols)] for i in range(rows)])
+    greaterH = np.array([[1 if applyH[i][j] > 240 else 0 for j in range(cols)] for i in range(rows)])#old 240
+    lesserH = np.array([[1 if applyH[i][j] <= 20 else 0 for j in range(cols)] for i in range(rows)]) #old 20
     # Union H > 240 U H <= 20
     unionGHLH = greaterH + lesserH
 
@@ -95,32 +95,32 @@ def skin_detection(image,F1,F2,White,H,ArcCos):
 
     return kImage
 
+def getNormRGB():
+    return lambda r,g,b: [b/(r+g+b+.00000001),g/(r+g+b+.00000001),r/(r+g+b+.00000001)]
+
 def getF1():
-    return lambda eta : -1.37*np.power(eta,2) + 1.0743*eta + 0.2
+    return lambda eta : -1.376*np.power(eta,2) + 1.0743*eta + 0.2
 
 def getF2():
     return lambda epsilon : -0.776*np.power(epsilon,2) + 0.5601*epsilon + 0.18
 
 def whiteRange():
     return lambda r,g: np.power(r - 0.33,2) + np.power(g - 0.33,2)
+
 #Functions for the HSI model
 def getArccosFunction():
-    return lambda r,g,b: 0.5 * ((r - g) + (r - b)) / np.sqrt(np.power(r - g, 2) + np.power(r - b, 2))
+    return lambda r,g,b: np.arccos(0.5 * ((r - g) + (r - b)) / np.sqrt(np.power(r - g, 2) + (r-b)*(g-b)))
 
 def getH():
-    return lambda B, G, theta: theta if B <= G else 360 - theta if B > G else 0
+    return lambda B, G, theta: theta if B <= G else 2*np.pi - theta if B > G else 0
 
 def getI():
     return lambda R, G, B:  1/3*(G + R + B)
 
 
-
-
-
-
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[2])
+    image = cv2.imread(images_folder + image_selected[0])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -128,12 +128,13 @@ def main():
     F2 = getF2()
     H = getH()
     ArcCos = getArccosFunction()
+    NormRGB = getNormRGB()
     I = getI()
     White = whiteRange()
 
-    newDetect = skin_detection(image,F1,F2,White,H,ArcCos)
+    newDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
 
-    cv2.imshow("Original",image)
+    #cv2.imshow("Original",image)
     cv2.imshow("Detection(Skin)",newDetect)
     cv2.waitKey(0)
     # resultI = I(rImage,gImage,bImage)
