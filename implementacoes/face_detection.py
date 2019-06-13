@@ -13,14 +13,17 @@ images_folder = 'imagens/'
 image_selected= ['person1.jpg',
                  'person2.jpg',
                  'person3.jpg',
-                 'person4.jpg']
+                 'person4.jpg',
+                 'person5.jpg',
+                 'person6.jpg',
+                 'person7.jpg']
 
 global width, height
 
 def hair_detection(image,H,I,ArcCoss,NormRGB):
     global rows, cols
     kImage = image.copy()
-    mImage = kImage.copy() / 255
+    mImage = kImage.copy()/255
     mImage = np.array([[NormRGB(mImage[i][j][2], mImage[i][j][1], mImage[i][j][0]) for j in range(cols)] for i in range(rows)])
     rImage = mImage[:, :, 2]
     gImage = mImage[:, :, 1]
@@ -29,19 +32,19 @@ def hair_detection(image,H,I,ArcCoss,NormRGB):
 
     angles = ArcCoss(rImage,gImage,bImage)
     applyH = np.array([[H(bImage[i][j],gImage[i][j],angles[i][j]) for j in range(cols)] for i in range(rows)])
-    #applyI = I(rImage,gImage,bImage)
-    applyI = I(kImage[:,:,2], kImage[:,:,1], kImage[:,:,0])
+    applyI = I(rImage,gImage,bImage)
+    #applyI = I(kImage[:,:,2], kImage[:,:,1], kImage[:,:,0])
     # Computing B - G and B - R
-    #bmg = bImage - gImage
-    #bmr = bImage - rImage
-    bmr = kImage[:, :, 0] - kImage[:, :, 2]
-    bmg = kImage[:,:,0] - kImage[:,:,1]
+    bmg = bImage - gImage
+    bmr = bImage - rImage
+    #bmr = kImage[:, :, 0] - kImage[:, :, 2]
+    #bmg = kImage[:,:,0] - kImage[:,:,1]
 
     for i in range(rows):
         for j in range(cols):
-            condition = (applyI[i,j] < 80)
-            condition = condition and (bmg[i,j] < 15 or bmr[i,j] < 15)
-            condition = condition or (applyH[i,j] > np.pi/3 and applyH[i,j] <= 1/3*np.pi )#2/9*np.pi
+            condition = (applyI[i,j] < .31372549)#80/255 ~ 0.31372549
+            condition = condition and (bmg[i,j] < .058823529 or bmr[i,j] < .058823529) #  15/255 ~ 0.058823529
+            condition = condition or (applyH[i,j] > np.pi/4 and applyH[i,j] <= 1/2*np.pi )# np.pi/3  2/9*np.pi
             if not condition:
                 kImage[i, j, 0] = 0.
                 kImage[i, j, 1] = 0.
@@ -108,7 +111,7 @@ def getI():
 
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[2])
+    image = cv2.imread(images_folder + image_selected[5])
     rows = image.shape[0]
     cols = image.shape[1]
 
