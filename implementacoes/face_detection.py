@@ -50,8 +50,8 @@ def hair_detection(image,H,I):
 def skin_detection(image,F1,F2,White,H,ArcCos,NormRGB):
     global rows, cols
     kImage = image.copy()
-    mImage= kImage / 255
-    #mImage = np.array([[NormRGB(kImage[i][j][2],kImage[i][j][1],kImage[i][j][0]) for j in range(cols)] for i in range(rows)])
+    mImage = kImage.copy()/255
+    mImage = np.array([[NormRGB(mImage[i][j][2], mImage[i][j][1], mImage[i][j][0]) for j in range(cols)] for i in range(rows)])
     rImage = mImage[:, :, 2]
     gImage = mImage[:, :, 1]
     bImage = mImage[:, :, 0]
@@ -61,37 +61,23 @@ def skin_detection(image,F1,F2,White,H,ArcCos,NormRGB):
 
     applyW = White(rImage, gImage)
 
-    # computing g < F1(r)
-    compF1 = np.array([[1 if gImage[i][j] < applyF1[i][j] else 0 for j in range(cols)] for i in range(rows)])
-    compF2 = np.array([[1 if gImage[i][j] > applyF2[i][j] else 0 for j in range(cols)] for i in range(rows)])
-    compW = np.array([[1 if applyW[i][j] > .001 else 0 for j in range(cols)] for i in range(rows)])#old 0.001
-    # intersection
-    compF1F2W = np.array([[1 if compF1[i][j] == compF2[i][j] else 0 for j in range(cols)] for i in range(rows)])
-    compF1F2W = np.array([[1 if compF1F2W[i][j] == compW[i][j] else 0 for j in range(cols)] for i in range(rows)])
-
-    compF1 = None
-    compF2 = None
-    applyW = None
-
     # calculating values for hsiModel
+    #angles = ArcCos(kImage[:,:,2], kImage[:,:,1], kImage[:,:,0])
     angles = ArcCos(rImage, gImage, bImage)
-    applyH = np.array([[H(bImage[i][j], gImage[i][j], angles[i][j]) for j in range(cols)] for i in range(rows)])
-
-    greaterH = np.array([[1 if applyH[i][j] > 240 else 0 for j in range(cols)] for i in range(rows)])#old 240
-    lesserH = np.array([[1 if applyH[i][j] <= 20 else 0 for j in range(cols)] for i in range(rows)]) #old 20
-    # Union H > 240 U H <= 20
-    unionGHLH = greaterH + lesserH
-
-    greaterH = None
-    lesserH = None
-    detect = np.array([[1  if compF1F2W[i][j] == unionGHLH[i][j] else 0 for j in range(cols)] for i in range(rows)])
-
+    #applyH = np.array([[H(kImage[i,j,0], kImage[i,j,1], angles[i][j]) for j in range(cols)] for i in range(rows)])
+    applyH = np.array([[H(bImage[i,j], gImage[i,j], angles[i][j]) for j in range(cols)] for i in range(rows)])
+    #detection
     for i in range(rows):
         for j in range(cols):
-            if detect[i][j] != 1:
-                kImage[i][j][0] = 0.
-                kImage[i][j][1] = 0.
-                kImage[i][j][2] = 0.
+            condition = (gImage[i][j] < applyF1[i][j])
+            condition = condition and (gImage[i][j] > applyF2[i][j])
+
+            condition = condition and (applyW[i][j] > 0.001)
+            condition = condition and (applyH[i][j] > 4/3*np.pi or applyH[i][j] <= np.pi/4)
+            if not condition:
+                kImage[i, j, 0] = 0.
+                kImage[i, j, 1] = 0.
+                kImage[i, j, 2] = 0.
 
     return kImage
 
@@ -109,7 +95,7 @@ def whiteRange():
 
 #Functions for the HSI model
 def getArccosFunction():
-    return lambda r,g,b: np.arccos(0.5 * ((r - g) + (r - b)) / np.sqrt(np.power(r - g, 2) + (r-b)*(g-b)))
+    return lambda r,g,b: np.arccos(0.5 * ((r - g) + (r - b)) / np.sqrt(np.power(r - g, 2) + (r-b)*(g-b)+.00000001))
 
 def getH():
     return lambda B, G, theta: theta if B <= G else 2*np.pi - theta if B > G else 0
