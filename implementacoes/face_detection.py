@@ -111,7 +111,7 @@ def getI():
 
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[5])
+    image = cv2.imread(images_folder + image_selected[0])
     rows = image.shape[0]
     cols = image.shape[1]
 
