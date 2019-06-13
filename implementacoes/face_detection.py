@@ -86,6 +86,24 @@ def skin_detection(image,F1,F2,White,H,ArcCos,NormRGB):
 
     return kImage
 
+
+def skin_quantization(skin_detect):
+    global  rows,cols
+    gray_skin_detect = cv2.cvtColor(skin_detect,cv2.COLOR_BGR2GRAY)
+    _,binary_skin = cv2.threshold(gray_skin_detect,0,255,cv2.THRESH_BINARY)
+    kernel = np.ones((10,10),dtype=np.uint8)
+    quantization = cv2.erode(binary_skin,kernel,iterations=1)
+    return quantization
+
+def hair_quantization(hair_detect):
+    global  rows,cols
+    gray_hair_detect = cv2.cvtColor(hair_detect,cv2.COLOR_BGR2GRAY)
+    _,binary_hair = cv2.threshold(gray_hair_detect,0,255,cv2.THRESH_BINARY)
+    kernel = np.ones((3,3),dtype=np.uint8)
+    quantization = cv2.erode(binary_hair,kernel,iterations=1)
+    quantization = cv2.dilate(quantization, kernel, iterations=1)
+    return quantization
+
 def getNormRGB():
     return lambda r,g,b: [b/(r+g+b+.00000001),g/(r+g+b+.00000001),r/(r+g+b+.00000001)]
 
@@ -111,7 +129,7 @@ def getI():
 
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[0])
+    image = cv2.imread(images_folder + image_selected[3])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -123,12 +141,16 @@ def main():
     I = getI()
     White = whiteRange()
 
-    skinDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
+    #skinDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
     hairDetect = hair_detection(image,H, I, ArcCos, NormRGB)
 
-    cv2.imshow("Original",image)
-    cv2.imshow("Detection(Skin)",skinDetect)
+    #qSkin = skin_quantization(skinDetect)
+    qHair = hair_quantization(hairDetect)
+    #cv2.imshow("Original",image)
+    #cv2.imshow("Detection(Skin)",skinDetect)
     cv2.imshow("Detection(Hair)",hairDetect)
+    #cv2.imshow("Quantization(Skin)",qSkin)
+    cv2.imshow("Quantization(Hair)", qHair)
     cv2.waitKey(0)
     # resultI = I(rImage,gImage,bImage)
 
