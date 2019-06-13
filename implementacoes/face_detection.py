@@ -17,36 +17,7 @@ image_selected= ['person1.jpg',
 
 global width, height
 
-def hair_detection(image,H,I,ArcCoss):
-    mImage = image.copy()
-    #Normalization
-    #mImage = mImage/255
-    epsilon = .000000001
-    for i in range(mImage.shape[0]):
-        for j in range(mImage.shape[1]):
-            # Relative frequency
-            summation = (mImage[i, j, 0] + mImage[i, j, 1] + mImage[i, j, 2] + epsilon)/255
-            r = np.divide(mImage[i, j, 2], summation)
-            g = np.divide(mImage[i, j, 1], summation)
-            b = np.divide(mImage[i, j, 0], summation)
-            # Compute values for the HSI color model
-            arg_arccos = 0.5 * ((r - g) + (r - b)) / np.sqrt(np.power(r - g, 2) + np.power(r - b, 2))
-            theta = np.arccos(arg_arccos)
-            h = H(b,g,theta)
-            y = I(r,g,b)
-            condition = (y<80 and (b-g < 15 or b-r < 15)) or ( h>20 and h<=40)
-            if(not condition):
-                mImage[i, j, 0] = 0.
-                mImage[i, j, 1] = 0.
-                mImage[i, j, 2] = 0.
-            else:
-                mImage[i, j, 0] = np.multiply(b,mImage[i, j, 0] + mImage[i, j, 1] + mImage[i, j, 2] + epsilon)
-                mImage[i, j, 1] = np.multiply(g,mImage[i, j, 0] + mImage[i, j, 1] + mImage[i, j, 2] + epsilon)
-                mImage[i, j, 2] = np.multiply(r,mImage[i, j, 0] + mImage[i, j, 1] + mImage[i, j, 2] + epsilon)
-
-    return  mImage
-
-def hair_detection2(image,H,I,ArcCoss,NormRGB):
+def hair_detection(image,H,I,ArcCoss,NormRGB):
     global rows, cols
     kImage = image.copy()
     mImage = kImage.copy() / 255
@@ -81,7 +52,7 @@ def hair_detection2(image,H,I,ArcCoss,NormRGB):
 def skin_detection(image,F1,F2,White,H,ArcCos,NormRGB):
     global rows, cols
     kImage = image.copy()
-    mImage = kImage.copy()
+    mImage = kImage.copy()/255
     mImage = np.array([[NormRGB(mImage[i][j][2], mImage[i][j][1], mImage[i][j][0]) for j in range(cols)] for i in range(rows)])
     rImage = mImage[:, :, 2]
     gImage = mImage[:, :, 1]
@@ -137,7 +108,7 @@ def getI():
 
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[3])
+    image = cv2.imread(images_folder + image_selected[2])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -149,12 +120,12 @@ def main():
     I = getI()
     White = whiteRange()
 
-    #newDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
-    newDetect = hair_detection2(image,H, I, ArcCos, NormRGB)
+    skinDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
+    hairDetect = hair_detection(image,H, I, ArcCos, NormRGB)
 
-    #cv2.imshow("Original",image)
-    #cv2.imshow("Detection(Skin)",newDetect)
-    cv2.imshow("Detection(Hair)", newDetect)
+    cv2.imshow("Original",image)
+    cv2.imshow("Detection(Skin)",skinDetect)
+    cv2.imshow("Detection(Hair)",hairDetect)
     cv2.waitKey(0)
     # resultI = I(rImage,gImage,bImage)
 
