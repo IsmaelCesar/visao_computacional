@@ -174,6 +174,12 @@ def compute_skin_hair_component_labeling(qSkin,qHair):
 
     return skinLabels,skinStats,skinCentroids,hairLabels,hairStats,hairCentroids
 
+def compute_boxes_interception(s_xy_positions,h_xy_positions):
+
+    for h_xy in h_xy_positions:
+        for s_xy in s_xy_positions:
+            print("Todo!")
+
 
 def getNormRGB():
     return lambda r,g,b: [b/(r+g+b+.00000001),g/(r+g+b+.00000001),r/(r+g+b+.00000001)]
