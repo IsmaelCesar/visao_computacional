@@ -104,6 +104,77 @@ def hair_quantization(hair_detect):
     quantization = cv2.dilate(quantization, kernel, iterations=1)
     return quantization
 
+def size_filter_single_face(labels,stats,centroids,xy_positions):
+    global rows,cols
+
+    greater = 0
+    component_label = 0
+    component_centroid = None
+    component_stats = None
+    component_positions= None
+    for i,s in enumerate(stats):
+        el = s[-1]
+        if el > greater :
+            greater=el
+            component_label = i
+            component_centroid = centroids[i]
+            component_stats = stats[i]
+            component_positions = xy_positions[i]
+
+    for i in  range(rows):
+        for j in range(cols):
+            if labels[i,j] != component_label:
+                labels[i, j] = 0
+
+    return  labels, component_stats, component_centroid,component_positions
+
+
+def size_filter(skinLabels,skinStats,skinCentroids,s_xy_positions,is_single_face=True):
+    # appling size filter
+    if is_single_face:
+        if (len(skinStats) > 1):
+            skinLabels, skinStats, skinCentroids, s_xy_positions = size_filter_single_face(skinLabels, skinStats,
+                                                                                        skinCentroids,s_xy_positions)
+
+    return skinLabels, skinStats, skinCentroids, s_xy_positions
+
+def compute_boudingbox_from_skin_hair_component_features(skinStats,hairStats):
+    s_xy_positions = []
+    h_xy_positions = []
+    # Compute x y position
+    for s, h in zip(skinStats, hairStats):
+        #Bouding box of skin components
+        s_x_min, s_y_min = s[0], s[1]
+        s_x_max = s[0] + s[2]
+        s_y_max = s[1] + s[3]
+
+        #Bounding box skin
+        h_x_min, h_y_min = h[0],h[1]
+        h_x_max = h[0] + h[2]
+        h_y_max = h[1] + h[3]
+        # The vertices of the bounding box are being computed in a clockwise manner
+        s_xy_positions.append([[s_x_min, s_y_min], [s_x_min, s_y_max], [s_x_max, s_y_max], [s_x_max, s_y_min]])
+        h_xy_positions.append([[h_x_min, h_y_min], [h_x_min, h_y_max], [h_x_max, h_y_max], [h_x_max, h_y_min]])
+
+    s_xy_positions = np.array(s_xy_positions[1:])
+    h_xy_positions = np.array(h_xy_positions[1:])
+
+    return s_xy_positions, h_xy_positions
+
+def compute_skin_hair_component_labeling(qSkin,qHair):
+    skinNumLabels, skinLabels, skinStats, skinCentroids = cv2.connectedComponentsWithStats(qSkin)
+    hairNumLabels, hairLabels, hairStats, hairCentroids = cv2.connectedComponentsWithStats(qHair)
+
+    # ignoring background label stasts and centroids and bounding box positons
+    skinStats = skinStats[1:]
+    hairStats = hairStats[1:]
+
+    skinCentroids = skinCentroids[1:]
+    hairCentroids = hairCentroids[1:]
+
+    return skinLabels,skinStats,skinCentroids,hairLabels,hairStats,hairCentroids
+
+
 def getNormRGB():
     return lambda r,g,b: [b/(r+g+b+.00000001),g/(r+g+b+.00000001),r/(r+g+b+.00000001)]
 
@@ -129,7 +200,7 @@ def getI():
 
 def main():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[3])
+    image = cv2.imread(images_folder + image_selected[0])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -141,15 +212,23 @@ def main():
     I = getI()
     White = whiteRange()
 
-    #skinDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
+    skinDetect = skin_detection(image,F1,F2,White,H,ArcCos,NormRGB)
     hairDetect = hair_detection(image,H, I, ArcCos, NormRGB)
 
-    #qSkin = skin_quantization(skinDetect)
+    qSkin = skin_quantization(skinDetect)
     qHair = hair_quantization(hairDetect)
-    #cv2.imshow("Original",image)
-    #cv2.imshow("Detection(Skin)",skinDetect)
+
+
+    skinLabels,skinStats,skinCentroids,hairLabels,hairStats,hairCentroids = compute_skin_hair_component_labeling(qSkin,qHair)
+
+    s_xy_pos, h_xy_pos = compute_boudingbox_from_skin_hair_component_features(skinStats,hairStats)
+
+    skinLabels,skinStats,skinCentroids,s_xy_pos = size_filter(skinLabels,skinStats,skinLabels,s_xy_pos)
+
+    cv2.imshow("Original",image)
+    cv2.imshow("Detection(Skin)",skinDetect)
     cv2.imshow("Detection(Hair)",hairDetect)
-    #cv2.imshow("Quantization(Skin)",qSkin)
+    cv2.imshow("Quantization(Skin)",qSkin)
     cv2.imshow("Quantization(Hair)", qHair)
     cv2.waitKey(0)
     # resultI = I(rImage,gImage,bImage)
