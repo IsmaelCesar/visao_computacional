@@ -119,7 +119,7 @@ def size_filter_single_face(labels,stats,centroids,xy_positions):
             component_label = i
             component_centroid = centroids[i]
             component_stats = stats[i]
-            component_positions = xy_positions[i]
+            component_positions = np.array([xy_positions[i]])
 
     for i in  range(rows):
         for j in range(cols):
@@ -156,8 +156,8 @@ def compute_boudingbox_from_skin_hair_component_features(skinStats,hairStats):
         s_xy_positions.append([[s_x_min, s_y_min], [s_x_min, s_y_max], [s_x_max, s_y_max], [s_x_max, s_y_min]])
         h_xy_positions.append([[h_x_min, h_y_min], [h_x_min, h_y_max], [h_x_max, h_y_max], [h_x_max, h_y_min]])
 
-    s_xy_positions = np.array(s_xy_positions[1:])
-    h_xy_positions = np.array(h_xy_positions[1:])
+    s_xy_positions = np.array(s_xy_positions)
+    h_xy_positions = np.array(h_xy_positions)
 
     return s_xy_positions, h_xy_positions
 
@@ -180,6 +180,12 @@ def compute_boxes_interception(s_xy_positions,h_xy_positions):
         for s_xy in s_xy_positions:
             print("Todo!")
 
+def detect_image(image,bouding_boxes):
+    detect = image.copy()
+    for i, xy in enumerate(bouding_boxes):
+        cv2.rectangle(detect, (xy[0, 0], xy[0, 1]), (xy[2, 0], xy[2, 1]), color=(0, 0, 255), thickness=3)
+
+    return detect
 
 def getNormRGB():
     return lambda r,g,b: [b/(r+g+b+.00000001),g/(r+g+b+.00000001),r/(r+g+b+.00000001)]
@@ -231,11 +237,14 @@ def main():
 
     skinLabels,skinStats,skinCentroids,s_xy_pos = size_filter(skinLabels,skinStats,skinLabels,s_xy_pos)
 
+    detect = detect_image(image, s_xy_pos)
+
     cv2.imshow("Original",image)
-    cv2.imshow("Detection(Skin)",skinDetect)
-    cv2.imshow("Detection(Hair)",hairDetect)
-    cv2.imshow("Quantization(Skin)",qSkin)
-    cv2.imshow("Quantization(Hair)", qHair)
+    cv2.imshow("Detection",detect)
+    #cv2.imshow("Detection(Skin)",skinDetect)
+    #cv2.imshow("Detection(Hair)",hairDetect)
+    #cv2.imshow("Quantization(Skin)",qSkin)
+    #cv2.imshow("Quantization(Hair)", qHair)
     cv2.waitKey(0)
     # resultI = I(rImage,gImage,bImage)
 
