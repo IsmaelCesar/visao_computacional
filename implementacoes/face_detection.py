@@ -16,7 +16,8 @@ image_selected= ['person1.jpg',
                  'person4.jpg',
                  'person5.jpg',
                  'person6.jpg',
-                 'person7.jpg']
+                 'person7.jpg',
+                 'persons.jpg']
 
 global width, height
 
@@ -92,7 +93,8 @@ def skin_quantization(skin_detect):
     gray_skin_detect = cv2.cvtColor(skin_detect,cv2.COLOR_BGR2GRAY)
     _,binary_skin = cv2.threshold(gray_skin_detect,0,255,cv2.THRESH_BINARY)
     kernel = np.ones((10,10),dtype=np.uint8)
-    quantization = cv2.erode(binary_skin,kernel,iterations=1)
+    quantization = cv2.erode(binary_skin,kernel,iterations=2)
+    quantization = cv2.dilate(quantization, kernel, iterations=2)
     return quantization
 
 def hair_quantization(hair_detect):
@@ -128,6 +130,30 @@ def size_filter_single_face(labels,stats,centroids,xy_positions):
 
     return  labels, component_stats, component_centroid,component_positions
 
+def size_filter_multi_face(labels,stats,centroids,xy_positions):
+    #For multiface detection, any component larger tha 50 pixels shall be preserved
+    global rows,cols
+    greater = 50
+    component_label = []
+    component_centroid = []
+    component_stats = []
+    component_positions= []
+    for i,s in enumerate(stats):
+        el = s[-1]
+        if el > greater :
+            component_label.append(i)
+            component_centroid.append(centroids[i])
+            component_stats.append(stats[i])
+            component_positions.append(np.array(xy_positions[i]))
+
+    for l in component_label:
+        for i in  range(rows):
+            for j in range(cols):
+                if labels[i,j] != l:
+                    labels[i, j] = 0
+
+    return  labels, component_stats, component_centroid,component_positions
+
 
 def size_filter(skinLabels,skinStats,skinCentroids,s_xy_positions,is_single_face=True):
     # appling size filter
@@ -135,6 +161,9 @@ def size_filter(skinLabels,skinStats,skinCentroids,s_xy_positions,is_single_face
         if (len(skinStats) > 1):
             skinLabels, skinStats, skinCentroids, s_xy_positions = size_filter_single_face(skinLabels, skinStats,
                                                                                         skinCentroids,s_xy_positions)
+    else:
+        skinLabels,skinStats,skinCentroids,s_xy_positions = size_filter_multi_face(skinLabels,skinStats,
+                                                                                   skinCentroids,s_xy_positions)
 
     return skinLabels, skinStats, skinCentroids, s_xy_positions
 
@@ -142,21 +171,25 @@ def compute_boudingbox_from_skin_hair_component_features(skinStats,hairStats):
     s_xy_positions = []
     h_xy_positions = []
     # Compute x y position
-    for s, h in zip(skinStats, hairStats):
+    for s in skinStats:
         #Bouding box of skin components
         s_x_min, s_y_min = s[0], s[1]
         s_x_max = s[0] + s[2]
         s_y_max = s[1] + s[3]
 
-        #Bounding box skin
-        h_x_min, h_y_min = h[0],h[1]
-        h_x_max = h[0] + h[2]
-        h_y_max = h[1] + h[3]
         # The vertices of the bounding box are being computed in a clockwise manner
         s_xy_positions.append([[s_x_min, s_y_min], [s_x_min, s_y_max], [s_x_max, s_y_max], [s_x_max, s_y_min]])
-        h_xy_positions.append([[h_x_min, h_y_min], [h_x_min, h_y_max], [h_x_max, h_y_max], [h_x_max, h_y_min]])
 
     s_xy_positions = np.array(s_xy_positions)
+
+    for h in hairStats:
+        # Bounding box hair
+        h_x_min, h_y_min = h[0], h[1]
+        h_x_max = h[0] + h[2]
+        h_y_max = h[1] + h[3]
+        h_xy_positions.append([[h_x_min, h_y_min], [h_x_min, h_y_max], [h_x_max, h_y_max], [h_x_max, h_y_min]])
+
+
     h_xy_positions = np.array(h_xy_positions)
 
     return s_xy_positions, h_xy_positions
@@ -195,7 +228,9 @@ def compute_boxes_intercection(s_xy_positions,h_xy_positions):
             area = max(0,xI_0 - xI_0 +1) *max(0,yI_2 - yI_2 + 1)
             if area > intesect_area:
                 hair_boxes.append(h_xy)
-                skin_hair_intersect.append([[xI_0,yI_0],[xI_1,yI_1],[xI_2,yI_2],[xI_3,yI_3]])
+                #skin_hair_intersect.append([[xI_0,yI_0],[xI_1,yI_1],[xI_2,yI_2],[xI_3,yI_3]])
+                skin_hair_intersect.append(s_xy)
+
     return np.array(hair_boxes),np.array(skin_hair_intersect)
 
 def detect_image(image,bouding_boxes):
@@ -253,7 +288,7 @@ def main():
 
     s_xy_pos, h_xy_pos = compute_boudingbox_from_skin_hair_component_features(skinStats,hairStats)
 
-    skinLabels,skinStats,skinCentroids,s_xy_pos = size_filter(skinLabels,skinStats,skinLabels,s_xy_pos)
+    skinLabels,skinStats,skinCentroids,s_xy_pos = size_filter(skinLabels,skinStats,skinCentroids,s_xy_pos)
 
     hair_box,intersect = compute_boxes_intercection(s_xy_pos,h_xy_pos)
 
@@ -266,8 +301,47 @@ def main():
     #cv2.imshow("Quantization(Skin)",qSkin)
     #cv2.imshow("Quantization(Hair)", qHair)
     cv2.waitKey(0)
-    # resultI = I(rImage,gImage,bImage)
+
+
+def test_case_multiface():
+    global rows, cols
+    image = cv2.imread(images_folder + image_selected[7])
+    rows = image.shape[0]
+    cols = image.shape[1]
+
+    F1 = getF1()
+    F2 = getF2()
+    H = getH()
+    ArcCos = getArccosFunction()
+    NormRGB = getNormRGB()
+    I = getI()
+    White = whiteRange()
+
+    skinDetect = skin_detection(image, F1, F2, White, H, ArcCos, NormRGB)
+
+    hairDetect = hair_detection(image, H, I, ArcCos, NormRGB)
+
+    qSkin = skin_quantization(skinDetect)
+    qHair = hair_quantization(hairDetect)
+
+
+    skinLabels, skinStats, skinCentroids, hairLabels, hairStats, hairCentroids = compute_skin_hair_component_labeling(
+        qSkin, qHair)
+
+    s_xy_pos, h_xy_pos = compute_boudingbox_from_skin_hair_component_features(skinStats, hairStats)
+
+    skinLabels, skinStats, skinCentroids, s_xy_pos = size_filter(skinLabels, skinStats, skinCentroids, s_xy_pos,
+                                                                 is_single_face=False)
+
+    hair_box, intersect = compute_boxes_intercection(s_xy_pos, h_xy_pos)
+
+    detect = detect_image(image, intersect)
+
+    cv2.imshow("Original", image)
+    cv2.imshow("Detection", detect)
+    cv2.waitKey(0)
 
 
 if __name__ == '__main__':
-    main()
+    #main()
+    test_case_multiface()
