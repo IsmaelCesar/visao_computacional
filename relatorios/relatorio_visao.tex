@@ -33,12 +33,19 @@
 \maketitle
 
 \section{Introdução}
-
+	A tarefa de detecção de face pode ser utilizada em diversas aplicações nos dias atuais.
+	Como por exemplo reconhecimento de faces em redes sociais ou até mesmo vigilância e segurança nacional.
+	Porém a tarefa de detectar uma face pode muito custosa, principalmente quanto se está utilizando um algoritmo de aprendizagem de máquina.
+	Neste trabalho serão explanadas as etapas de detecção de face baseado no mínimo de características de face detectadas. 
+	A organização deste trabalho será da seguinte forma: Na seção \ref{sec:conceitosBasicos} serão introduzidos os conceitos básicos por trás da extração das características mínimas de face.
+	Na seção \ref{sec:metodologia} é discutida a metodologia utilizada bem como algumas alterações na implementação de modo a se obter melhores detecções.
+	Na seção \ref{sec:resultados} são mostrados resultados e também é discutido como detecções espúrias afetam na precisão do algoritmo.
+	Na seção \ref{sec:trabalhosFuturos} são discutidos trabalhos futuros.	
 \section{Conceitos Básicos}
 	\label{sec:conceitosBasicos}
 	O algoritmo em \cite{chen2007simple} pode ser dividido em três passos diferentes. 
 	Detecção de Pele e cabelo, onde são computados os valores que representam os intervalos de cores de pele e cabelo para a binarização. 
-	Quantização de pele e cabelo, onde uma vez binarizadas as detecções são aplicadas operações morfológicas, são computatos os componentes conexos e suas características e aplica-se os filtros de tamanho.
+	Quantização de pele e cabelo, onde uma vez binarizadas as detecções são aplicadas operações morfológicas, são computados os componentes conexos e suas características e aplica-se os filtros de tamanho.
 	Ao final, é feita a união das características, procurando intesecções entre retângulos que contém componentes conexos de cabelo e retângulos que contém componente conexos de pele.
 	Como as etapas de detecção de pele e de cabelo são feitas de modo ligeiramente diferente, a explanação do funcionamento de ambas foi colocada em duas seções diferentes.
 	Porém as etapas de quantização e união de características ocorre de maneira similar, tanto para deteção de cabelo quanto para detecção de pele.
@@ -166,6 +173,7 @@
 	\end{figure}
 	
 	\section{Metodologia}
+	\label{sec:metodologia}
 	
 	A réplica dos conceitos apresentados em \cite{chen2007simple} foram feitas utilizando python 3.6.
 	Também foram utilizadas fuções das bibliotecas python OpenCV e numpy.
@@ -260,6 +268,7 @@
 	E $hairR$ e $skinR$ os vértices inferiores mais a direita.
 	
 	\section{Resultados}
+	\label{sec:resultados}
 	O algoritmo proposto é extremamente dependete das cores da imagem. 
 	Apesar do uso das cores como característica de deteção de detecção ser simples de utilizar, seu pode resultar  em detecções espúrias.
 	Principalmente em regiões que não pertencem a pele ou cabelo do indivíduo, mas são detectadas como tal pois o possuem uma tonalidade de cor parecida com que consta no intervalo de cor das primitivas implementadas.
@@ -354,6 +363,7 @@ Original &  Detection\\
 
 
 	\section{Trabalhos Futuros}
+	\label{sec:trabalhosFuturos}
 %Deixar para o final
 	O algoritmo proposto em \cite{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características.
 	Porém por ser altamente dependente das cores presentes na imagem, mesmo pode acabar resultando em outliers muito distantes do que seria uma detecção de face ideal.
