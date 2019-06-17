@@ -263,7 +263,7 @@
 	O algoritmo proposto é extremamente dependete das cores da imagem. 
 	Apesar do uso das cores como característica de deteção de detecção ser simples de utilizar, seu pode resultar  em detecções espúrias.
 	Principalmente em regiões que não pertencem a pele ou cabelo do indivíduo, mas são detectadas como tal pois o possuem uma tonalidade de cor parecida com que consta no intervalo de cor das primitivas implementadas.
-
+%Resultados Bons
 \begin{figure}[htb]
 \resizebox{.9 \textwidth}{!}{
 \begin{tabular}{cccccc}
@@ -292,8 +292,64 @@
 Original & Skin Detection & Hair Detection & Skin Quantization & Hair Quantization & Detection\\
 \end{tabular}
 }	
+\caption{Resultados de deteção de pele e cabelos segundo as etapas descritas na seção de metodologia}
+\label{fig:goodDetection}
+\end{figure}  
+
+	Na figura \ref{fig:badDetection} é possível notar detecções espúrias relacionadas a dependência de cores do algorítmo.
+	Apesar do indivíduo detectado não ter cabelo, o algorítmo detectou a face do mesmo devido a intersecção de componentes de cabelo ao fundo da imagem e componentes de face que estão próximos.
+%Resultados spurios
+\begin{figure}[h]
+\resizebox{.9 \textwidth}{!}{
+\begin{tabular}{cccccc}
+
+	\includegraphics[scale=0.3]{images/OriginalSpurious.png}
+  &
+
+	\includegraphics[scale=0.3]{images/skinDetectSpurious.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/hairDetectSpurious.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/skinQuantizationSpurious.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/hairQuantizationSpurious.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/DetectionSpurious.png}
+\\
+Original & Skin Detection & Hair Detection & Skin Quantization & Hair Quantization & Detection\\
+\end{tabular}
+}	
+\caption{Resultados espúrios de deteção de pele e cabelos segundo as etapas descritas na seção de metodologia}
+\label{fig:badDetection}
 \end{figure}  
 	
+	Algo similar acontece quando se trata de regiões que são identificadas como face simplesmentes por ter uma tonalidade de cor cujo valor se encontra no intervalo das primitivas implementadas.	
+	
+	%Resultados multiplos
+\begin{figure}[htb]
+\resizebox{1 \textwidth}{!}{
+\begin{tabular}{cc}
+
+	\includegraphics[scale=0.3]{images/OriginalSpurious2.png}
+  &
+
+	\includegraphics[scale=0.3]{images/DetectionSpurious2.png}
+\\
+Original &  Detection\\
+\end{tabular}
+}	
+\caption{Resultados espúrios de detecção multiface}
+\label{fig:badDetection}
+\end{figure} 
+
 %Deixar para o final
 %	O algoritmo em \citep{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características
 	
