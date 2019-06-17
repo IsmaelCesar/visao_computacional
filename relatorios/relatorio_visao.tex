@@ -78,8 +78,40 @@
 		\begin{figure}[htb]
 			\includegraphics[scale=0.3]{espaco_hsi.png}
 			\caption{Espaço de cores do modelo de cores HSI. fonte:\cite{ibraheem2012understanding} }
+			\label{fig:espacoCoresHSI}
 		\end{figure}
 	\end{center}
+	
+	Para o algoritmo de detecção de só é necessário computar os valores relativos a \textit{Hue} e \textit{Intensity}.
+	O valor de \textit{Hue} é atribuido segundo os valores B e G do esquema RGB. 
+	Porém, antes de se computar o valor de \textit{Hue} é necessário computar o ângulo a qual o valor de RGB do pixel correspondem no espaço de cores do esquema HSI Fig.~\ref{fig:espacoCoresHSI}.
+	As equações para computar os valores de ângulo, \textit{Hue} e \textit{Intensity} respectivamente encontra-se a seguir:
+	
+	\begin{equation}
+		\theta (R,G,B) = cos^{-1}\left( \frac{0.5((R-G)+(R-B))}{\sqrt{(R-G)^2 +(R-B)(G-R) }} \right)
+	\end{equation}
+	\begin{equation}
+	Hue(B,G,\theta) = 	\begin{cases}
+						\theta,  \text{if } B \leq G \\
+						360^\circ - \theta,  \text{if } B > G
+						\end{cases}
+	\end{equation}
+	\begin{equation}
+	I(R,G,B) = 	\frac{1}{3} (R+G+B)
+	\end{equation}
+
+	Para se efetuar a detecção de pele numa imagem, faz-se uma binarização da imagem segundo os valores de computados segundo as equações mencionados.
+	\begin{equation}
+		SkinDetect = \begin{cases}
+						1 , \text{ if }\left( g < F_1(r) \cap g > F_2(r) \cap White(r,g) > 0.001 \cap	
+											(Hue(B,G,\theta) > 240 \cup Hue(B,G,\theta) \leq 20) \right) \\
+						0 , \text{ otherwise }
+						\end{cases}
+	\end{equation}
+	
+	\subsection{Detecção de Cabelo}
+	
+		
 	
 	
 \bibliographystyle{IEEEtranS}
