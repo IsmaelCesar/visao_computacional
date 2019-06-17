@@ -332,7 +332,9 @@ Original & Skin Detection & Hair Detection & Skin Quantization & Hair Quantizati
 \end{figure}  
 	
 	Algo similar acontece quando se trata de regiões que são identificadas como face simplesmentes por ter uma tonalidade de cor cujo valor se encontra no intervalo das primitivas implementadas.	
-	
+	Na figura \ref{fig:badMultifaceDetection} é possível observar que a detecção de uma região muito grande como se fosse um rosto.
+	Também é possível notar a existência de detecções que não pertencem a um rosto.
+	Mas que foram detectadas como tal devido a computação de intesecções de regiões detectadas como cabelo estavam muito próximas das mesmas.
 	%Resultados multiplos
 \begin{figure}[htb]
 \resizebox{1 \textwidth}{!}{
@@ -347,11 +349,17 @@ Original &  Detection\\
 \end{tabular}
 }	
 \caption{Resultados espúrios de detecção multiface}
-\label{fig:badDetection}
+\label{fig:badMultifaceDetection}
 \end{figure} 
 
+
+	\section{Trabalhos Futuros}
 %Deixar para o final
-%	O algoritmo em \citep{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características
+	O algoritmo proposto em \cite{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características.
+	Porém por ser altamente dependente das cores presentes na imagem, mesmo pode acabar resultando em outliers muito distantes do que seria uma detecção de face ideal.
+	Porém tal algoritmo pode ser como uma heurística para melhorar algoritmos de aprendizagem de máquina que efetuam detecção de face.
+	Os algoritmos mais simples geralmente efetuam uma varredura completa na imagem para poder propagar os mapas de características ao longo das camadas.
+	Um possível trabalho futuro seria investigar se utilização deste algoritmo para definir regiões de interesse  deixaria outros algoritmos de aprendizagem de máquina para detecção de face mais eficientes e precisos.
 	
 \bibliographystyle{IEEEtranS}
 \bibliography{bibliography}
