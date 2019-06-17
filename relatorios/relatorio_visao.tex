@@ -89,15 +89,18 @@
 	
 	\begin{equation}
 		\theta (R,G,B) = cos^{-1}\left( \frac{0.5((R-G)+(R-B))}{\sqrt{(R-G)^2 +(R-B)(G-R) }} \right)
+		\label{eq:angle}	
 	\end{equation}
 	\begin{equation}
 	Hue(B,G,\theta) = 	\begin{cases}
 						\theta,  \text{if } B \leq G \\
 						360^\circ - \theta,  \text{if } B > G
 						\end{cases}
+	\label{eq:hue}
 	\end{equation}
 	\begin{equation}
 	I(R,G,B) = 	\frac{1}{3} (R+G+B)
+	\label{eq:intensity}
 	\end{equation}
 
 	Para se efetuar a detecção de pele numa imagem, faz-se uma binarização da imagem segundo os valores de computados segundo as equações mencionados.
@@ -111,8 +114,32 @@
 	
 	\subsection{Detecção de Cabelo}
 	
-		
+	Para a detecção de tons de cabelo também é efetuada uma binarização da imagem. 
+	Ao se fazer a binarização da imagem utiliza apenas as equações \eqref{eq:angle}\eqref{eq:hue}\eqref{eq:intensity} como sub-rotinas.
+	Outros valores de comparação considerados são as diferenças entre o valor B e os valores R e G.
 	
+	\begin{equation}
+		HairDetect = \begin{cases}
+						1 , \text{ if }\left( (I(R,G,B) < 80 \cap ((B-G)< 15 \cup (B-R) < 15))
+										\cup (20 < Hue(B,G,\theta) \leq 40 ) \right) \\
+						0 , \text{ otherwise }
+						\end{cases}
+	\end{equation}
+	
+	\subsection{Quantização de pele e cabelo}
+	
+	A etapa de quantização ocorrre de forma semelhante tanto para detecção de cabelo quanto para detecção de pele.
+	Uma vez retornada as binarizações da imagens com as detecções de pele e cabelo, são aplicadas operações morfológicas nos retornos \textit{SkinDetetct} e \textit{HairDetect}.
+ 	Os elementos estruturantes tem de tamanho $5\times 5$.
+	A morfologia é calculada para determinar se um pixel numa região pertence a um componente conexo de cabelo ou pelo, ou se o pixel varrido é apenas ruido de detecção.
+	
+	Em seguida, são computados os componentes conexos e as características dos mesmos de \textit{SkinDetetct} e \textit{HairDetect}.
+	As características computadas são o centroide, a área do componente conexo e as posições $(x,y)$ dos pixels mais externos, tanto o mais mais acima e mais a esquerda, quanto o mais abaixo mais a direita.
+	Após a computação é feita uma filtragem de componentes conexos.
+	Também chamado de filtro de tamanho, ou \textit{size filter}.
+	O filtro de tamanho verifica a área de cada componente conexo e exclui o componente conexo cuja área é menor que um limiar qualquer $\lambda$.
+	
+	\subsection{União de features}	
 	
 \bibliographystyle{IEEEtranS}
 \bibliography{bibliography}
