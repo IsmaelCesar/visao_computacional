@@ -74,13 +74,14 @@
 	\textit{Saturation} representa o nível de puresa da cor, e \textit{Intensity} trata-se de um valor acromático , que representa a itesidade da cor.
 	Tanto o valor de \textit{Saturation} quanto o de \textit{Itensity} estão no intervalo de $[0,1]$.
 	A figura a seguir ilustra o espaço de cores do modelo HSI. 
-	\begin{center}
+
 		\begin{figure}[htb]
+		\begin{center}		
 			\includegraphics[scale=0.3]{espaco_hsi.png}
 			\caption{Espaço de cores do modelo de cores HSI. fonte:\cite{ibraheem2012understanding} }
 			\label{fig:espacoCoresHSI}
+		\end{center}
 		\end{figure}
-	\end{center}
 	
 	Para o algoritmo de detecção de só é necessário computar os valores relativos a \textit{Hue} e \textit{Intensity}.
 	O valor de \textit{Hue} é atribuido segundo os valores B e G do esquema RGB. 
@@ -139,7 +140,21 @@
 	Também chamado de filtro de tamanho, ou \textit{size filter}.
 	O filtro de tamanho verifica a área de cada componente conexo e exclui o componente conexo cuja área é menor que um limiar qualquer $\lambda$.
 	
-	\subsection{União de features}	
+	\subsection{União de características}	
+	
+	Para a união de características, faz-se o uso de cas posições $(x,y)$ computadas dos componentes conexos da detecção de cabelo e pele.
+	Isso é feito devido a o fato das posições computadas das features representarem um retângulo que contém o componente conexo.
+	Onde para cada componente conexo em \textit{SkinDetect} é verificado se há intersecção com algum componente conexo em $HairDetect$.
+	Caso afirmativo, o algoritmo considera que achou uma face.
+	Na figura \ref{fig:intesectRelations} são mostradas as relações de intesecção que são consideradas no algoritmo por simplicidade.
+	\begin{figure}[htp]
+	\begin{center}
+		\includegraphics[scale=0.3]{intersections_skin_hair_components.png}
+		\caption{Relações de intersecção entre retângulos que contém cabelo e pele, fonte:\cite{chen2007simple} }			\label{fig:intesectRelations}
+	\end{center}
+	\end{figure}
+	
+	
 	
 \bibliographystyle{IEEEtranS}
 \bibliography{bibliography}
