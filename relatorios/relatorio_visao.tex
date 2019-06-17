@@ -168,11 +168,12 @@
 	\section{Metodologia}
 	
 	A réplica dos conceitos apresentados em \cite{chen2007simple} foram feitas utilizando python 3.6.
+	Também foram utilizadas fuções das bibliotecas python OpenCV e numpy.
 	As primitivas $F_1,F_2,\theta,White,Hue,I$  foram implementadas utilizando lambda expressões por simplicidade.
 	Assim como na seção \ref{sec:conceitosBasicos} haverá uma explanação diferente nas etapas de deteção de cabelo e detecção de pele. 
 	Isso acontecerá devido a fato de abordagens diferentes terem sido utilizadas tanto na réplica quanto na adaptação do código para que os resultados obtidos fossem parecidos ou até melhores.
 	
-	\subsection{Réplica detecção de pele}
+	\subsection{Réplica: detecção de pele}
 	
 	Antes de se aplicar as primitivas de detecção de pele foi efetuada uma modificação do método de normalização.
 	Primeiramente todos os valores contidos no array que represntava a imagem foram divididos por 255,chamado neste trabalho de nomalização geral.
@@ -198,7 +199,7 @@
 	\label{eq:newSkinDetect}
 	\end{equation}
 	
-	\subsection{Réplica detecção de cabelo}
+	\subsection{Réplica: detecção de cabelo}
 	
 	A mesma estratégia de aplicar uma normalização geral e normalização relativa pixel a pixel foram aplicadas na etapa de detecção de cabelo.
 	Porém na comparação da equação \eqref{eq:HairDetect} foram efetuadas modificações, tanto na comparação dos valores de $Hue$ quanto na comparação dos valores de $I$ e nas diferenças entre os canais $B-G$ e $B-R$.
@@ -220,7 +221,22 @@
 	\label{eq:newHaitDetect}
 	\end{equation}
 	
+	\subsection{Réplica: quantização de cabelo e pele}
 	
+	Uma vez obtidas as binarizações das imagens segundo a detecções de pele cabelo, faz-se uma computação de componentes conexos junto com suas features básicas, a partir da chadada do procedimento $connectedComponentsWithStats(binaryImage)$, onde $binaryImage$ é a imagem binarizada.
+	
+	A única modificação quanto a etapa de quantização tanto de pele quanto de cabelo foi feita quanto a aplicação das operações morfológicas das imagens binarizadas.
+	Para operação morfológica na binarização da detecção de pele o tamanho do elemento estruturante foi modificado de $5 \times 5$ para $10 \times 10$.
+	E foram efeutadas duas operações de erosão seguidas de duas operações de dilatação. 
+	Foi empiricamente observado que tais sequências de operações resulta numa melhor remoção de ruído de detecção de pele.
+
+	Para binarização resultante da detecção de cabelo, o elemento estrutuarante foi modificado de $5 \times 5$ para $3 \times 3$.
+	 Foi aplicada apenas uma operação de abertura.
+	 Semelhantemente, foi empiricamente observado que tais modificações resultavam numa melhor remoção do ruído de detecção de cabelo.
+	 
+	 \subsection{Réplica: união de características}
+	 
+	 
 	
 %Deixar para o final
 %	O algoritmo em \citep{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características
