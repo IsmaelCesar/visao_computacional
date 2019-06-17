@@ -174,11 +174,29 @@ def compute_skin_hair_component_labeling(qSkin,qHair):
 
     return skinLabels,skinStats,skinCentroids,hairLabels,hairStats,hairCentroids
 
-def compute_boxes_interception(s_xy_positions,h_xy_positions):
-
+def compute_boxes_intercection(s_xy_positions,h_xy_positions):
+    hair_boxes = []
+    skin_hair_intersect = []
+    intesect_area = 0
     for h_xy in h_xy_positions:
         for s_xy in s_xy_positions:
-            print("Todo!")
+            xI_0 = max(h_xy[0][0], s_xy[0][0])
+            yI_0 = max(h_xy[0][1], s_xy[0][1])
+
+            xI_1 = min(h_xy[1][0],s_xy[1][0])
+            yI_1 = max(h_xy[1][1], s_xy[1][1])
+
+            xI_2 = min(h_xy[2][0], s_xy[2][0])
+            yI_2 = min(h_xy[2][1], s_xy[2][1])
+
+            xI_3 = max(h_xy[3][0], s_xy[3][0])
+            yI_3 = min(h_xy[3][1], s_xy[3][1])
+
+            area = max(0,xI_0 - xI_0 +1) *max(0,yI_2 - yI_2 + 1)
+            if area > intesect_area:
+                hair_boxes.append(h_xy)
+                skin_hair_intersect.append([[xI_0,yI_0],[xI_1,yI_1],[xI_2,yI_2],[xI_3,yI_3]])
+    return np.array(hair_boxes),np.array(skin_hair_intersect)
 
 def detect_image(image,bouding_boxes):
     detect = image.copy()
@@ -237,7 +255,9 @@ def main():
 
     skinLabels,skinStats,skinCentroids,s_xy_pos = size_filter(skinLabels,skinStats,skinLabels,s_xy_pos)
 
-    detect = detect_image(image, s_xy_pos)
+    hair_box,intersect = compute_boxes_intercection(s_xy_pos,h_xy_pos)
+
+    detect = detect_image(image, intersect)
 
     cv2.imshow("Original",image)
     cv2.imshow("Detection",detect)
