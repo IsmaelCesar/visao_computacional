@@ -1,3 +1,6 @@
 CMakeLists.txt
 .idea/
 cmake-build-debug/
+*.aux
+*.log
+*.synctex.gz
