@@ -143,7 +143,7 @@
 	A etapa de quantização ocorrre de forma semelhante tanto para detecção de cabelo quanto para detecção de pele.
 	Uma vez retornada as binarizações da imagens com as detecções de pele e cabelo, são aplicadas operações morfológicas nos retornos \textit{SkinDetetct} e \textit{HairDetect}.
  	Os elementos estruturantes tem de tamanho $5\times 5$.
-	A morfologia é calculada para determinar se um pixel numa região pertence a um componente conexo de cabelo, pele, ou se o pixel varrido é apenas ruido de detecção.
+	A morfologia é calculada para determinar se um pixel numa região pertence a um componente conexo de cabelo, pele, ou se o pixel varrido é apenas ruído de detecção.
 	
 	Em seguida, são computados os componentes conexos e as características dos mesmos de \textit{SkinDetetct} e \textit{HairDetect}.
 	As características computadas são o centroide, a área do componente conexo e as posições $(x,y)$ dos pixels mais externos, tanto o mais mais acima e mais a esquerda, quanto o mais abaixo mais a direita.
@@ -184,7 +184,7 @@
 	Outra modificação aplicada foi a comparação da equação \eqref{eq:SkinDetect} em relação a o valor de $Hue$.
 	O ângulo é retornado valores em radianos não em graus.
 	Sendo o maior e o menor ângulo da comparação na equação $\frac{4}{3}\pi$ e $\frac{\pi}{4}$,  $240^\circ$ e $45^\circ$ respectivamente.
-	Diferentemente do ângulo $20^\circ$ aprensentado na equação \eqref{eq:HairDetect}, foi empiricamente observado que o ângulo $45^\circ$ resutava em melhores detecções de regiões de pele.
+	Diferentemente do ângulo $20^\circ$ aprensentado na equação \eqref{eq:HairDetect}, foi empiricamente observado que o ângulo $45^\circ$ resultava em melhores detecções de regiões de pele.
 	
 	Sejam os valores $r,g,b$ os valores dos canais $RGB$ da imagem após a normalização geral seguida da normalização relativa pixel a pixel. 
 	Os mesmos foram utilizados como entrada das primitivas $\theta (r,g,b)$ , $Hue(b,g,\theta)$ e $I(r,g,b)$.
@@ -236,7 +236,27 @@
 	 
 	 \subsection{Réplica: união de características}
 	 
+	Uma vez computadas as características dos componentes conexos da quantização de cabelo e face passa-se para a etapa de união de características.
+	O algoritmo proposto em \cite{chen2007simple} considera que caso não haja intersecção então não foi detectada nenhuma face.
+	Das características computadas a principal é o retângulo que contém o componente conexo que representa uma detecção de cabelo ou de face.
+	
+	Na réplica, ao invés de simplesmente verificar a existência de intersecção entre retângulos a partir dos pontos.quantização
+	Foi efetuado o cálculo da área da intersecção entre os retângulos que contém os componentes conexos da detecção de cabelo e detecção de pele.
+	Desse modo é possível distinguir entre intesecções maiores entre retângulos, e remover intersecções resultantes de detecções espúrias resultantes de ruídos que conseguiram passar pela etapa de quantização.
+	O cálculo das posições $(x,y)$ dos vértices do retângulo de intersecção foi feito segundo eq
 	 
+	 \begin{equation}
+	 	\begin{cases}
+	 	x_1 = max(hairL.x,skinL.x) \\
+	 	y_1 = max(hairL.y,skinL.y) \\
+	 	
+	 	x_2 = min(hairR.x,skinR.x) \\
+	 	y_2 = min(hairR.y,skinR.y) 
+	 	\end{cases}
+	 \end{equation}
+	 
+	Onde $hairL$ e $skinL$ são os vértices superiores mais a esquerda dos retângulos que contém os componentes conexos de detecção de cabelo e pele respectivamente.
+	E $hairR$ e $skinR$ os vértices inferiores mais a direita.
 	
 %Deixar para o final
 %	O algoritmo em \citep{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características
