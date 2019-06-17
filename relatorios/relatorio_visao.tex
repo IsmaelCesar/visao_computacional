@@ -21,7 +21,7 @@
     \begin{center}\large#1\end{center}
     \vskip0.5em}%
 }
-\title{Relatorio de projeto de segunda VA}
+\title{Relatório de projeto de segunda VA}
 \subtitle{Réplica do trabalho:Simple face-detection algorithm based on minimum facial features}
 \author{		Ismael Cesar da Silva Araujo
   				Departamento de computação \\
@@ -243,7 +243,7 @@
 	Na réplica, ao invés de simplesmente verificar a existência de intersecção entre retângulos a partir dos pontos.quantização
 	Foi efetuado o cálculo da área da intersecção entre os retângulos que contém os componentes conexos da detecção de cabelo e detecção de pele.
 	Desse modo é possível distinguir entre intesecções maiores entre retângulos, e remover intersecções resultantes de detecções espúrias resultantes de ruídos que conseguiram passar pela etapa de quantização.
-	O cálculo das posições $(x,y)$ dos vértices do retângulo de intersecção foi feito segundo eq
+	O cálculo das posições $(x,y)$ dos vértices do retângulo de intersecção foi feito segundo Eq.\eqref{eq:intersectionPositions}.
 	 
 	 \begin{equation}
 	 	\begin{cases}
@@ -253,6 +253,7 @@
 	 	x_2 = min(hairR.x,skinR.x) \\
 	 	y_2 = min(hairR.y,skinR.y) 
 	 	\end{cases}
+	 	\label{eq:intersectionPositions}
 	 \end{equation}
 	 
 	Onde $hairL$ e $skinL$ são os vértices superiores mais a esquerda dos retângulos que contém os componentes conexos de detecção de cabelo e pele respectivamente.
