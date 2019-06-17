@@ -259,6 +259,41 @@
 	Onde $hairL$ e $skinL$ são os vértices superiores mais a esquerda dos retângulos que contém os componentes conexos de detecção de cabelo e pele respectivamente.
 	E $hairR$ e $skinR$ os vértices inferiores mais a direita.
 	
+	\section{Resultados}
+	O algoritmo proposto é extremamente dependete das cores da imagem. 
+	Apesar do uso das cores como característica de deteção de detecção ser simples de utilizar, seu pode resultar  em detecções espúrias.
+	Principalmente em regiões que não pertencem a pele ou cabelo do indivíduo, mas são detectadas como tal pois o possuem uma tonalidade de cor parecida com que consta no intervalo de cor das primitivas implementadas.
+
+\begin{figure}[htb]
+\resizebox{.9 \textwidth}{!}{
+\begin{tabular}{cccccc}
+
+	\includegraphics[scale=0.3]{images/Original.png}
+  &
+
+	\includegraphics[scale=0.3]{images/skinDetect.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/hairDetect.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/skinQuantization.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/hairQuantization.png}
+
+&
+
+	\includegraphics[scale=0.3]{images/Detection.png}
+\\
+Original & Skin Detection & Hair Detection & Skin Quantization & Hair Quantization & Detection\\
+\end{tabular}
+}	
+\end{figure}  
+	
 %Deixar para o final
 %	O algoritmo em \citep{chen2007simple} tem como objetivo detectar faces de acordo com o mínimo possível de características
 	
