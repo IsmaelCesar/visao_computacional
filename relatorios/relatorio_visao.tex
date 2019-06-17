@@ -35,6 +35,7 @@
 \section{Introdução}
 
 \section{Conceitos Básicos}
+	\label{sec:conceitosBasicos}
 	O algoritmo em \cite{chen2007simple} pode ser dividido em três passos diferentes. 
 	Detecção de Pele e cabelo, onde são computados os valores que representam os intervalos de cores de pele e cabelo para a binarização. 
 	Quantização de pele e cabelo, onde uma vez binarizadas as detecções são aplicadas operações morfológicas, são computatos os componentes conexos e suas características e aplica-se os filtros de tamanho.
@@ -43,10 +44,11 @@
 	Porém as etapas de quantização e união de características ocorre de maneira similar, tanto para deteção de cabelo quanto para detecção de pele.
 	
 	\subsection{Detecção de pele}
+	\label{subsec:deteccaoPele}
 	O modelo de cor normalizado, trata-se de um tipo de normalização feita por pixel. 
 	Considerando uma com canais RGB (Sigla em inglês para Vermelho, Verde e Azul), 
 	A normalização da imagem segundo o modelo de cor normalizada calcularia pra cada pixel o valor contido no canal dividido pela soma de todos os valores dos canais no pixel avaliado~\cite{chen2007simple,loesdau2017chromatic}. 
-	Seja $\varepsilon$ um valor da ordem de $10^{-8}$, somado a o denominador para se evitar divisão por zero\eqref{eq:nomalizedColorModel}.	
+	Seja $\varepsilon$ uma constante da ordem de $10^{-8}$ somada a o denominador para se evitar divisão por zero\eqref{eq:nomalizedColorModel}.	
 	\begin{equation}
 		\begin{split}
 			r  = \frac{R}{R+G+B+\varepsilon} \\\\
@@ -115,9 +117,10 @@
 	\begin{equation}
 		SkinDetect = \begin{cases}
 						1 , \text{ if }\left( g < F_1(r) \cap g > F_2(r) \cap White(r,g) > 0.001 \cap	
-											(Hue(B,G,\theta) > 240 \cup Hue(B,G,\theta) \leq 20) \right) \\
+											(Hue(B,G,\theta) > 240^\circ \cup Hue(B,G,\theta) \leq 20^\circ) \right) \\
 						0 , \text{ otherwise }
 						\end{cases}
+	\label{eq:SkinDetect}
 	\end{equation}
 	
 	\subsection{Detecção de Cabelo}
@@ -129,9 +132,10 @@
 	\begin{equation}
 		HairDetect = \begin{cases}
 						1 , \text{ if }\left( (I(R,G,B) < 80 \cap ((B-G)< 15 \cup (B-R) < 15))
-										\cup (20 < Hue(B,G,\theta) \leq 40 ) \right) \\
+										\cup (20^\circ < Hue(B,G,\theta) \leq 40^\circ ) \right) \\
 						0 , \text{ otherwise }
 						\end{cases}
+	\label{eq:HairDetect}
 	\end{equation}
 	
 	\subsection{Quantização de pele e cabelo}
@@ -139,7 +143,7 @@
 	A etapa de quantização ocorrre de forma semelhante tanto para detecção de cabelo quanto para detecção de pele.
 	Uma vez retornada as binarizações da imagens com as detecções de pele e cabelo, são aplicadas operações morfológicas nos retornos \textit{SkinDetetct} e \textit{HairDetect}.
  	Os elementos estruturantes tem de tamanho $5\times 5$.
-	A morfologia é calculada para determinar se um pixel numa região pertence a um componente conexo de cabelo ou pelo, ou se o pixel varrido é apenas ruido de detecção.
+	A morfologia é calculada para determinar se um pixel numa região pertence a um componente conexo de cabelo, pele, ou se o pixel varrido é apenas ruido de detecção.
 	
 	Em seguida, são computados os componentes conexos e as características dos mesmos de \textit{SkinDetetct} e \textit{HairDetect}.
 	As características computadas são o centroide, a área do componente conexo e as posições $(x,y)$ dos pixels mais externos, tanto o mais mais acima e mais a esquerda, quanto o mais abaixo mais a direita.
@@ -162,6 +166,60 @@
 	\end{figure}
 	
 	\section{Metodologia}
+	
+	A réplica dos conceitos apresentados em \cite{chen2007simple} foram feitas utilizando python 3.6.
+	As primitivas $F_1,F_2,\theta,White,Hue,I$  foram implementadas utilizando lambda expressões por simplicidade.
+	Assim como na seção \ref{sec:conceitosBasicos} haverá uma explanação diferente nas etapas de deteção de cabelo e detecção de pele. 
+	Isso acontecerá devido a fato de abordagens diferentes terem sido utilizadas tanto na réplica quanto na adaptação do código para que os resultados obtidos fossem parecidos ou até melhores.
+	
+	\subsection{Réplica detecção de pele}
+	
+	Antes de se aplicar as primitivas de detecção de pele foi efetuada uma modificação do método de normalização.
+	Primeiramente todos os valores contidos no array que represntava a imagem foram divididos por 255,chamado neste trabalho de nomalização geral.
+	Somente em seguida é que foi aplicada uma normalização relativa a os valores das cores do pixel avaliado, segundo a Eq. \eqref{eq:nomalizedColorModel}.
+	Isso foi feito pois, segundo observações experimentais, áreas pertencentes a um elemento de pele não estavam sendo detectadas como pelo algoritmo.
+	
+	Aplicando somente a normalização relativa pixel a pixel, o intervalo de valores de regiões com tonalidades de cor de pele não se encontravam nos limites das primitivas da subseção \ref{subsec:deteccaoPele}.
+	Outra modificação aplicada foi a comparação da equação \eqref{eq:SkinDetect} em relação a o valor de $Hue$.
+	O ângulo é retornado valores em radianos não em graus.
+	Sendo o maior e o menor ângulo da comparação na equação $\frac{4}{3}\pi$ e $\frac{\pi}{4}$,  $240^\circ$ e $45^\circ$ respectivamente.
+	Diferentemente do ângulo $20^\circ$ aprensentado na equação \eqref{eq:HairDetect}, foi empiricamente observado que o ângulo $45^\circ$ resutava em melhores detecções de regiões de pele.
+	
+	Sejam os valores $r,g,b$ os valores dos canais $RGB$ da imagem após a normalização geral seguida da normalização relativa pixel a pixel. 
+	Os mesmos foram utilizados como entrada das primitivas $\theta (r,g,b)$ , $Hue(b,g,\theta)$ e $I(r,g,b)$.
+	A comparação resultante das modificações da etapa de detecção de pele ficou como em Eq~\eqref{eq:newSkinDetect}.
+
+		\begin{equation}
+		SkinDetect = \begin{cases}
+						1 , \text{ if }\left( g < F_1(r) \cap g > F_2(r) \cap White(r,g) > 0.001 \cap	
+										(Hue(b,g,\theta) > \frac{4}{3}\pi \cup Hue(b,g,\theta) \leq \frac{\pi}{4} ) \right) \\
+						0 , \text{ otherwise }
+						\end{cases}
+	\label{eq:newSkinDetect}
+	\end{equation}
+	
+	\subsection{Réplica detecção de cabelo}
+	
+	A mesma estratégia de aplicar uma normalização geral e normalização relativa pixel a pixel foram aplicadas na etapa de detecção de cabelo.
+	Porém na comparação da equação \eqref{eq:HairDetect} foram efetuadas modificações, tanto na comparação dos valores de $Hue$ quanto na comparação dos valores de $I$ e nas diferenças entre os canais $B-G$ e $B-R$.
+	Primeiramente, os algulos dos limites inferior e superior utilizados na comparação dos valores de $Hue$ foram $\frac{\pi}{4}$ e $\frac{\pi}{2}$, $45^\circ$ e $90^\circ$ respectivamente.
+	Diferentemente dos $20^\circ $ e $40^\circ$ mostrados na equação \eqref{eq:HairDetect}, foi empiricamente observado que os ângulos $45^\circ$ e $90^\circ$ resultavam e detecções melhores de regiões de cabelo.
+	
+	Assim como na réplica da detecção de pele, os valores normalizados $r,g,b$, também serviram de entrada das primitivas $Hue$, $I$ e $\theta$ utilizadas. 
+	Os mesmos também foram utilizados na computação das diferenças entre o canal azul e os canais verde e vermelho.
+	Dado o fato de que os valores estão normalizados, os valores comparados com aqueles que as primitivas e as diferenças computam foram divididos por $255$.
+	Empiricamente foi observado que esta ação resultava em boas detecções de cabelo.
+	A comparação resultante das alterações ficou como em Eq~\eqref{eq:newHairDetect}
+	
+	\begin{equation}
+		HairDetect = \begin{cases}
+					1 , \text{ if }\left( (I(r,g,b) < 0.313 \cap ((b-g)< 0.0588 \cup (b-r) < 0.0588))
+									\cup (\frac{\pi}{4} < Hue(b,g,\theta) \leq \frac{\pi}{2} ) \right) \\
+					0 , \text{ otherwise }
+					\end{cases}	
+	\label{eq:newHaitDetect}
+	\end{equation}
+	
 	
 	
 %Deixar para o final
