@@ -45,7 +45,56 @@
 \frame{
 	\frametitle{Conceitos Básicos}
 	
+	\begin{itemize}
+		\item Uso de primitivas para computação de valores
+		\item Modelo de cor RGB normalizado:	
+		\begin{equation}
+		\begin{split}
+			r  = \frac{R}{R+G+B+\varepsilon} \\
+			g  = \frac{G}{R+G+B+\varepsilon} \\
+			b  = \frac{B}{R+G+B+\varepsilon}
+		\end{split}
+		\end{equation}	
+	\end{itemize}			
+}
+
+\frame{
+	\frametitle{Conceitos Básicos}
 	
+	\begin{itemize}
+		\item Primitivas que definem o intervalos de cores para o canal $r$
+		\begin{equation}
+		\begin{split}
+			F_1(r)  = -1.367r^2 + 1.0743r + 0.2 \\
+			F_2(r)  = -0.776r^2 + 0.5601r + 0.18
+		\end{split}
+		\end{equation}
+		\item Primitiva para computação dos ton de branco nos canais $r$ e $g$
+		\begin{equation}
+			White(r,g) = (r - 0.33)^2 + (g - 0.33)^2 
+		\end{equation}
+	\end{itemize}
+}
+
+\frame{
+	\frametitle{Conceitos Básicos}
+	\begin{itemize}
+		\item Primitivas para relações entre o modelo de cor RGB e HSI
+		$$
+		\theta (R,G,B) = cos^{-1}\left( \frac{0.5((R-G)+(R-B))}{\sqrt{(R-G)^2 +(R-B)(G-R) }} \right)
+		$$
+		\\
+		$$
+	Hue(B,G,\theta) = 	\begin{cases}
+						\theta,  \text{if } B \leq G \\
+						360^\circ - \theta,  \text{if } B > G
+						\end{cases}
+		$$
+		\\
+		$$
+		I(R,G,B) = 	\frac{1}{3} (R+G+B)
+		$$
+	\end{itemize}
 }
 
 \end{document}
