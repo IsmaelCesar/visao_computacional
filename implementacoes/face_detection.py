@@ -263,9 +263,55 @@ def getI():
     return lambda R, G, B:  1/3*(G + R + B)
 
 
-def detect_single_face():
+def real_time():
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[0])
+    F1 = getF1()
+    F2 = getF2()
+    White = whiteRange()
+    ArcCoss = getArccosFunction()
+
+    H = getH()
+    I = getI()
+    NormRGB = getNormRGB()
+
+    capture = cv2.VideoCapture(0)
+
+    while (True):
+
+        ret, image = capture.read()
+        rows = image.shape[0]
+        cols = image.shape[1]
+
+        skinDetect = skin_detection(image, F1, F2, White, H, ArcCoss, NormRGB)
+        hairDetect = hair_detection(image, H, I, ArcCoss, NormRGB)
+
+        qSkin = skin_quantization(skinDetect)
+        qHair = hair_quantization(hairDetect)
+
+        skinLabels, skinStats, skinCentroids, hairLabels, hairStats, hairCentroids = compute_skin_hair_component_labeling(
+            qSkin, qHair)
+
+        s_xy_pos, h_xy_pos = compute_boudingbox_from_skin_hair_component_features(skinStats, hairStats)
+
+        skinLabels, skinStats, skinCentroids, s_xy_pos = size_filter(skinLabels, skinStats, skinCentroids, s_xy_pos,
+                                                                     is_single_face=False)
+
+        hair_box, intersect = compute_boxes_intercection(s_xy_pos, h_xy_pos)
+
+        detect = detect_image(image, intersect)
+
+        if cv2.waitKey(10) == 27:
+            break
+
+        cv2.imshow("RealTime", detect)
+
+    cv2.destroyAllWindows()
+
+
+def detect_single_face(idx):
+    assert idx <= 7 and idx >= 0
+    global rows, cols
+    image = cv2.imread(images_folder + image_selected[idx])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -299,9 +345,10 @@ def detect_single_face():
     cv2.waitKey(0)
 
 
-def detect_multiface():
+def detect_multiface(idx):
+    assert idx <= 7 and idx >= 0
     global rows, cols
-    image = cv2.imread(images_folder + image_selected[7])
+    image = cv2.imread(images_folder + image_selected[idx])
     rows = image.shape[0]
     cols = image.shape[1]
 
@@ -340,5 +387,6 @@ def detect_multiface():
 
 
 if __name__ == '__main__':
-    detect_single_face()
-    #detect_multiface()
+    detect_single_face(0)
+    #detect_multiface(7)
+    #real_time()
