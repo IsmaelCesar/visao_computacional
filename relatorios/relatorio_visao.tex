@@ -23,7 +23,7 @@
 }
 \title{Relatório de projeto de segunda VA}
 \subtitle{Réplica do trabalho:Simple face-detection algorithm based on minimum facial features}
-\author{		Ismael Cesar da Silva Araujo
+\author{		Ismael Cesar da Silva Araujo \\
   				Departamento de computação \\
 				  Ciência da computação\\
 		Universidade Federal Rural de Pernambuco (UFRPE)\\
@@ -35,7 +35,7 @@
 \section{Introdução}
 	A tarefa de detecção de face pode ser utilizada em diversas aplicações nos dias atuais.
 	Como por exemplo reconhecimento de faces em redes sociais ou até mesmo vigilância e segurança nacional.
-	Porém a tarefa de detectar uma face pode muito custosa, principalmente quanto se está utilizando um algoritmo de aprendizagem de máquina.
+	Porém a tarefa de detectar uma face pode muito custosa, principalmente quando se está utilizando um algoritmo de aprendizagem de máquina.
 	Neste trabalho serão explanadas as etapas de detecção de face baseado no mínimo de características de face detectadas. 
 	A organização deste trabalho será da seguinte forma: Na seção \ref{sec:conceitosBasicos} serão introduzidos os conceitos básicos por trás da extração das características mínimas de face.
 	Na seção \ref{sec:metodologia} é discutida a metodologia utilizada bem como algumas alterações na implementação de modo a se obter melhores detecções.
@@ -47,13 +47,13 @@
 	Detecção de Pele e cabelo, onde são computados os valores que representam os intervalos de cores de pele e cabelo para a binarização. 
 	Quantização de pele e cabelo, onde uma vez binarizadas as detecções são aplicadas operações morfológicas, são computados os componentes conexos e suas características e aplica-se os filtros de tamanho.
 	Ao final, é feita a união das características, procurando intesecções entre retângulos que contém componentes conexos de cabelo e retângulos que contém componente conexos de pele.
-	Como as etapas de detecção de pele e de cabelo são feitas de modo ligeiramente diferente, a explanação do funcionamento de ambas foi colocada em duas seções diferentes.
+	Como as etapas de detecção de pele e de cabelo são feitas de modo ligeiramente diferente, a explanação do funcionamento de ambas foi colocada em duas subseções diferentes.
 	Porém as etapas de quantização e união de características ocorre de maneira similar, tanto para deteção de cabelo quanto para detecção de pele.
 	
 	\subsection{Detecção de pele}
 	\label{subsec:deteccaoPele}
 	O modelo de cor normalizado, trata-se de um tipo de normalização feita por pixel. 
-	Considerando uma com canais RGB (Sigla em inglês para Vermelho, Verde e Azul), 
+	Considerando uma imagem com canais RGB (Sigla em inglês para Vermelho, Verde e Azul), 
 	A normalização da imagem segundo o modelo de cor normalizada calcularia pra cada pixel o valor contido no canal dividido pela soma de todos os valores dos canais no pixel avaliado~\cite{chen2007simple,loesdau2017chromatic}. 
 	Seja $\varepsilon$ uma constante da ordem de $10^{-8}$ somada a o denominador para se evitar divisão por zero\eqref{eq:nomalizedColorModel}.	
 	\begin{equation}
@@ -99,9 +99,9 @@
 		\end{center}
 		\end{figure}
 	
-	Para o algoritmo de detecção de só é necessário computar os valores relativos a \textit{Hue} e \textit{Intensity}.
+	Para o algoritmo de detecção de pele só é necessário computar os valores relativos a \textit{Hue} e \textit{Intensity}.
 	O valor de \textit{Hue} é atribuido segundo os valores B e G do esquema RGB. 
-	Porém, antes de se computar o valor de \textit{Hue} é necessário computar o ângulo a qual o valor de RGB do pixel correspondem no espaço de cores do esquema HSI Fig.~\ref{fig:espacoCoresHSI}.
+	Porém, antes de se computar o valor de \textit{Hue} é necessário computar o ângulo ao qual o valor de RGB do pixel correspondem no espaço de cores do esquema HSI Fig.~\ref{fig:espacoCoresHSI}.
 	As equações para computar os valores de ângulo, \textit{Hue} e \textit{Intensity} respectivamente encontra-se a seguir:
 	
 	\begin{equation}
@@ -120,7 +120,7 @@
 	\label{eq:intensity}
 	\end{equation}
 
-	Para se efetuar a detecção de pele numa imagem, faz-se uma binarização da imagem segundo os valores de computados segundo as equações mencionados.
+	Para se efetuar a detecção de pele numa imagem, faz-se uma binarização da imagem segundo os valores de computados segundo as equações mencionadas.
 	\begin{equation}
 		SkinDetect = \begin{cases}
 						1 , \text{ if }\left( g < F_1(r) \cap g > F_2(r) \cap White(r,g) > 0.001 \cap	
@@ -154,6 +154,7 @@
 	
 	Em seguida, são computados os componentes conexos e as características dos mesmos de \textit{SkinDetetct} e \textit{HairDetect}.
 	As características computadas são o centroide, a área do componente conexo e as posições $(x,y)$ dos pixels mais externos, tanto o mais mais acima e mais a esquerda, quanto o mais abaixo mais a direita.
+	
 	Após a computação é feita uma filtragem de componentes conexos.
 	Também chamado de filtro de tamanho, ou \textit{size filter}.
 	O filtro de tamanho verifica a área de cada componente conexo e exclui o componente conexo cuja área é menor que um limiar qualquer $\lambda$.
@@ -161,7 +162,7 @@
 	\subsection{União de características}	
 	
 	Para a união de características, faz-se o uso das posições $(x,y)$ computadas dos componentes conexos da detecção de cabelo e pele.
-	Isso é feito devido a o fato das posições computadas das features representarem um retângulo que contém o componente conexo.
+	Isso é feito devido a o fato das posições computadas das características representarem um retângulo que contém o componente conexo.
 	Onde para cada componente conexo em $SkinDetect$ é verificado se há intersecção com algum componente conexo em $HairDetect$.
 	Caso afirmativo, o algoritmo considera que achou uma face.
 	Na figura \ref{fig:intesectRelations} são mostradas as relações de intesecção que são consideradas no algoritmo por simplicidade.
@@ -176,7 +177,7 @@
 	\label{sec:metodologia}
 	
 	A réplica dos conceitos apresentados em \cite{chen2007simple} foram feitas utilizando python 3.6.
-	Também foram utilizadas fuções das bibliotecas python OpenCV e numpy.
+	Também foram utilizadas funções das bibliotecas python OpenCV e numpy.
 	As primitivas $F_1,F_2,\theta,White,Hue,I$  foram implementadas utilizando lambda expressões por simplicidade.
 	Assim como na seção \ref{sec:conceitosBasicos} haverá uma explanação diferente nas etapas de deteção de cabelo e detecção de pele. 
 	Isso acontecerá devido a fato de abordagens diferentes terem sido utilizadas tanto na réplica quanto na adaptação do código para que os resultados obtidos fossem parecidos ou até melhores.
@@ -184,13 +185,13 @@
 	\subsection{Réplica: detecção de pele}
 	
 	Antes de se aplicar as primitivas de detecção de pele foi efetuada uma modificação do método de normalização.
-	Primeiramente todos os valores contidos no array que represntava a imagem foram divididos por 255,chamado neste trabalho de nomalização geral.
+	Primeiramente todos os valores contidos no array que representava a imagem foram divididos por 255,chamado neste trabalho de nomalização geral.
 	Somente em seguida é que foi aplicada uma normalização relativa a os valores das cores do pixel avaliado, segundo a Eq. \eqref{eq:nomalizedColorModel}.
 	Isso foi feito pois, segundo observações experimentais, áreas pertencentes a um elemento de pele não estavam sendo detectadas como pelo algoritmo.
-	
 	Aplicando somente a normalização relativa pixel a pixel, o intervalo de valores de regiões com tonalidades de cor de pele não se encontravam nos limites das primitivas da subseção \ref{subsec:deteccaoPele}.
+	
 	Outra modificação aplicada foi a comparação da equação \eqref{eq:SkinDetect} em relação a o valor de $Hue$.
-	O ângulo é retornado valores em radianos não em graus.
+	O ângulo é retornado com valores em radianos não em graus.
 	Sendo o maior e o menor ângulo da comparação na equação $\frac{4}{3}\pi$ e $\frac{\pi}{4}$,  $240^\circ$ e $45^\circ$ respectivamente.
 	Diferentemente do ângulo $20^\circ$ aprensentado na equação \eqref{eq:HairDetect}, foi empiricamente observado que o ângulo $45^\circ$ resultava em melhores detecções de regiões de pele.
 	
@@ -218,7 +219,7 @@
 	Os mesmos também foram utilizados na computação das diferenças entre o canal azul e os canais verde e vermelho.
 	Dado o fato de que os valores estão normalizados, os valores comparados com aqueles que as primitivas e as diferenças computam foram divididos por $255$.
 	Empiricamente foi observado que esta ação resultava em boas detecções de cabelo.
-	A comparação resultante das alterações ficou como em Eq~\eqref{eq:newHairDetect}
+	A comparação resultante das alterações ficou como em Eq.~\eqref{eq:newHairDetect}.
 	
 	\begin{equation}
 		HairDetect = \begin{cases}
@@ -226,17 +227,17 @@
 									\cup (\frac{\pi}{4} < Hue(b,g,\theta) \leq \frac{\pi}{2} ) \right) \\
 					0 , \text{ otherwise }
 					\end{cases}	
-	\label{eq:newHaitDetect}
+	\label{eq:newHairDetect}
 	\end{equation}
 	
 	\subsection{Réplica: quantização de cabelo e pele}
 	
-	Uma vez obtidas as binarizações das imagens segundo a detecções de pele cabelo, faz-se uma computação de componentes conexos junto com suas features básicas, a partir da chadada do procedimento $connectedComponentsWithStats(binaryImage)$, onde $binaryImage$ é a imagem binarizada.
+	Uma vez obtidas as binarizações das imagens segundo a detecções de pele cabelo, faz-se uma computação de componentes conexos junto com suas características básicas, a partir da chadada do procedimento $connectedComponentsWithStats(binaryImage)$, onde $binaryImage$ é a imagem binarizada.
 	
 	A única modificação quanto a etapa de quantização tanto de pele quanto de cabelo foi feita quanto a aplicação das operações morfológicas das imagens binarizadas.
 	Para operação morfológica na binarização da detecção de pele o tamanho do elemento estruturante foi modificado de $5 \times 5$ para $10 \times 10$.
-	E foram efeutadas duas operações de erosão seguidas de duas operações de dilatação. 
-	Foi empiricamente observado que tais sequências de operações resulta numa melhor remoção de ruído de detecção de pele.
+	E foram efetuadas duas operações de erosão seguidas de duas operações de dilatação. 
+	Foi empiricamente observado que tais sequências de operações resultavam numa melhor remoção de ruído de detecção de pele.
 
 	Para binarização resultante da detecção de cabelo, o elemento estrutuarante foi modificado de $5 \times 5$ para $3 \times 3$.
 	 Foi aplicada apenas uma operação de abertura.
@@ -248,7 +249,7 @@
 	O algoritmo proposto em \cite{chen2007simple} considera que caso não haja intersecção então não foi detectada nenhuma face.
 	Das características computadas a principal é o retângulo que contém o componente conexo que representa uma detecção de cabelo ou de face.
 	
-	Na réplica, ao invés de simplesmente verificar a existência de intersecção entre retângulos a partir dos pontos.quantização
+	Na réplica, ao invés de simplesmente verificar a existência de intersecção entre retângulos a partir dos pontos.
 	Foi efetuado o cálculo da área da intersecção entre os retângulos que contém os componentes conexos da detecção de cabelo e detecção de pele.
 	Desse modo é possível distinguir entre intesecções maiores entre retângulos, e remover intersecções resultantes de detecções espúrias resultantes de ruídos que conseguiram passar pela etapa de quantização.
 	O cálculo das posições $(x,y)$ dos vértices do retângulo de intersecção foi feito segundo Eq.\eqref{eq:intersectionPositions}.
@@ -270,8 +271,8 @@
 	\section{Resultados}
 	\label{sec:resultados}
 	O algoritmo proposto é extremamente dependete das cores da imagem. 
-	Apesar do uso das cores como característica de deteção de detecção ser simples de utilizar, seu pode resultar  em detecções espúrias.
-	Principalmente em regiões que não pertencem a pele ou cabelo do indivíduo, mas são detectadas como tal pois o possuem uma tonalidade de cor parecida com que consta no intervalo de cor das primitivas implementadas.
+	Apesar do uso das cores como característica de deteção ser simples de utilizar, seu uso pode resultar  em detecções espúrias.
+	Principalmente em regiões que não pertencem a pele ou cabelo do indivíduo, mas são detectadas como tal pois possuem uma tonalidade de cor parecida com as que constam no intervalo de cores das primitivas implementadas.
 %Resultados Bons
 \begin{figure}[htb]
 \resizebox{.9 \textwidth}{!}{
