@@ -263,7 +263,7 @@ def getI():
     return lambda R, G, B:  1/3*(G + R + B)
 
 
-def main():
+def detect_single_face():
     global rows, cols
     image = cv2.imread(images_folder + image_selected[0])
     rows = image.shape[0]
@@ -296,14 +296,10 @@ def main():
 
     cv2.imshow("Original",image)
     cv2.imshow("Detection",detect)
-    #cv2.imshow("Detection(Skin)",skinDetect)
-    #cv2.imshow("Detection(Hair)",hairDetect)
-    #cv2.imshow("Quantization(Skin)",qSkin)
-    #cv2.imshow("Quantization(Hair)", qHair)
     cv2.waitKey(0)
 
 
-def test_case_multiface():
+def detect_multiface():
     global rows, cols
     image = cv2.imread(images_folder + image_selected[7])
     rows = image.shape[0]
@@ -325,6 +321,7 @@ def test_case_multiface():
     qHair = hair_quantization(hairDetect)
 
 
+
     skinLabels, skinStats, skinCentroids, hairLabels, hairStats, hairCentroids = compute_skin_hair_component_labeling(
         qSkin, qHair)
 
@@ -343,5 +340,5 @@ def test_case_multiface():
 
 
 if __name__ == '__main__':
-    #main()
-    test_case_multiface()
+    detect_single_face()
+    #detect_multiface()
